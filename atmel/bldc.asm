@@ -1,5 +1,4 @@
-; $copyright$
-; Last modified
+; -*- mode: avr -*- 
 
 
 
@@ -36,9 +35,9 @@
 ; status of pwm
 	.equ	stable		= 1
 	.equ	rcp_done	= 2
-	
+
 	.equ	full_power	= 7
-	
+
 
 ;	.equ	debug_flag	= 3
 ;	.equ	debug_zc_timeout = 4
@@ -256,6 +255,12 @@ state_change:
 	ldi		yl,low(mem_states)
 	ldi		yh,high(mem_states)
 	mov		r16,state_index
+;*********************************
+	sbrs	r16,0
+	sbi		PORTB,2
+	sbrc	r16,0
+	cbi		PORTB,2
+;*********************************
 	add		r16,r16
 	add		yl,r16
 	adc		yh,zero
@@ -268,7 +273,7 @@ state_change:
 	sbic	PORTB,PB3
 	out		PORTD,state_on
 	resume_t2 r16
-	ret					
+	ret
 instant_full_pwm:
 	pause_t2 r16
 sch_1:
@@ -958,7 +963,15 @@ szc_low:
 
 	sbic	ACSR,ACO
 	rjmp	scan_zc_new
-
+;*********************************
+	sbis	PORTB,0
+	rjmp	ddd_1
+	cbi		PORTB,0
+	rjmp	ddd_2
+ddd_1:
+	sbi		PORTB,0
+ddd_2:
+;*********************************
 	sbrc	flag1,full_power
 	rjmp	zc_happen
 
@@ -975,6 +988,15 @@ szc_high:
 
 	sbis	ACSR,ACO
 	rjmp	scan_zc_new
+;*********************************
+	sbis	PORTB,0
+	rjmp	ddd_3
+	cbi		PORTB,0
+	rjmp	ddd_4
+ddd_3:
+	sbi		PORTB,0
+ddd_4:
+;*********************************
 
 	sbrc	flag1,full_power
 	rjmp	zc_happen
