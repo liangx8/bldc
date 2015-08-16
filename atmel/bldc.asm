@@ -536,7 +536,7 @@ state_start:
 	rcall	RCP2PWM
 	and		r16,r16
 	breq	stop_motor
-
+	rjmp wait_rest
 	sbrc	flag1,startup
 	rcall	startup_accel
 	sbrs	flag1,startup
@@ -589,17 +589,21 @@ set_comm:
 	rcall	set_t1
 ;	rcall	study_speed
 wait_rest:
-; debug --------------------------------------------------
-	lds		r16,mem_comm
-	lds		r17,mem_comm+1
-	rcall	data_save
-; debug end ----------------------------------------------
 	inc		state_index
 	ldi		r16,6
 	cp		state_index,r16
 	brcs	wtr_1
 	clr		state_index
 wtr_1:
+; debug --------------------------------------------------
+sbis	ACSR,ACO
+rjmp xdd_1
+sbi		PORTB,0
+rjmp xdd_2
+xdd_1:
+cbi		PORTB,0
+xdd_2:
+; debug end ----------------------------------------------
 	in		r16,TIFR
 	sbrs	r16,TOV1
 	rjmp	wtr_1
